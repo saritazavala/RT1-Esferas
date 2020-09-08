@@ -5,6 +5,10 @@
 
 import struct
 from collections import namedtuple
+import math
+
+import self as self
+
 V2 = namedtuple('Point2', ['x', 'y'])
 V3 = namedtuple('Point3', ['x', 'y', 'z'])
 
@@ -84,6 +88,32 @@ def barycentric(A, B, C, P):
 
 # --------------------------------------------------
 
+class Material(object):
+  def __init__(self, diffuse):
+    self.diffuse = diffuse
+
+# Sphere class
+class Sphere(object):
+  def __init__(self, center, radius, material):
+    self.center = center
+    self.radius = radius
+    self.material = material
+
+  def ray_intersect(self, orig, direction):
+    L = sub(self.center, orig)
+    tca = dot(L, direction)
+    l = length(L)
+    d2 = l ** 2 - tca ** 2
+    if d2 > self.radius ** 2:
+      return False
+    thc = (self.radius ** 2 - d2) ** 1 / 2
+    t0 = tca - thc
+    t1 = tca + thc
+    if t0 < 0:
+      t0 = t1
+    if t0 < 0:
+      return False
+    return True
 
 # Write a BMP file ---------------------------------
 class Render(object):
@@ -136,6 +166,7 @@ class Render(object):
 
     # Writes all the doc
     def glFinish(self):
+      self.render_function()
       self.header()
 
 
@@ -173,6 +204,7 @@ class Render(object):
       y_temp = round((y + 1) * (self.ViewPort_height / 2) + self.y_position)
       self.glpoint(round(x_temp), round(y_temp))
 
+    # This function creates a Line using the glpoint() function
     def glLine(self, x1, y1, x2, y2):
       dy = abs(y2 - y1)
       dx = abs(x2 - x1)
@@ -202,5 +234,71 @@ class Render(object):
         if offset >= threshold:
           y += 1 if y1 < y2 else -1
           threshold += 2 * dx
+
+    def scene_intersect(self, orig, direction):
+      for obj in self.scene:
+        if obj.ray_intersect(orig, direction):
+          return obj.material
+      return None
+
+    def cast_ray(self, orig, direction):
+      # esta funcion devuelve un color gracias al rayo
+      impacted_material = self.scene_intersect(orig, direction)
+      if impacted_material:
+        return impacted_material.diffuse
+      else:
+        return color(0, 1, 0)
+
+
+
+    def render_function(self):
+      alfa = int(math.pi / 2)
+      for y in range(self.height):
+        for x in range(self.width):
+          i = (2 * (x + 0.5) / self.width - 1) * self.width / self.height * math.tan(alfa / 2)
+          j = (1 - 2 * (y + 0.5) / self.height) * math.tan(alfa / 2)
+          direction = norm(V3(i, j, -1))
+          self.framebuffer[y][x] = self.cast_ray(V3(0, 0, 0), direction)
+
+
+
+
+# Create --------------------------
+
+ivory = Material(diffuse=color(0.39, 0.39, 0.39))
+rubber = Material(diffuse=color(0.03,0.04, 0))
+snow = Material(diffuse=color(1, 1, 1))
+button = Material(diffuse=color(0, 0, 0))
+eye = Material(diffuse=color(0.98, 0.98, 0.98))
+carrot = Material(diffuse=color(0,0,0))
+
+r = Render('Ray.bmp')
+r.glCreateWindow(800,600)
+r.glClear()
+r.scene = [
+  Sphere(V3(-0.6, -2.1,-10), 0.1, button),
+  Sphere(V3(-0.2, -1.9,-10), 0.1, button),
+  Sphere(V3(0.2, -1.9,-10), 0.1, button),
+  Sphere(V3(0.6, -2.1,-10), 0.1, button),
+
+  Sphere(V3(0, -2.5,-10), 0.3, carrot),
+
+  Sphere(V3(0.5, -3,-10), 0.1, button),
+  Sphere(V3(-0.5, -3,-10), 0.1, button),
+  Sphere(V3(0.5, -3,-10), 0.2, eye),
+  Sphere(V3(-0.5, -3,-10), 0.2, eye),
+
+  Sphere(V3(0, -0.4,-10), 0.3, button),
+  Sphere(V3(0, 1,-10), 0.4, button),
+  Sphere(V3(0, 3,-10), 0.5, button),
+  Sphere(V3(0, -2.5,-10), 1.3, snow),
+	Sphere(V3(0, 0,-10), 1.8, snow),
+  Sphere(V3(0, 3,-12), 2.8, snow)
+]
+r.glFinish()
+
+
+
+
 
 
