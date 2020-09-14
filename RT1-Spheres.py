@@ -204,6 +204,12 @@ class Render(object):
       y_temp = round((y + 1) * (self.ViewPort_height / 2) + self.y_position)
       self.glpoint(round(x_temp), round(y_temp))
 
+    def scene_intersect(self, origin, dir):
+      for obj in self.scene:
+        if obj.ray_intersect(origin, dir):
+          return obj.material
+      return None
+
     # This function creates a Line using the glpoint() function
     def glLine(self, x1, y1, x2, y2):
       dy = abs(y2 - y1)
@@ -235,22 +241,6 @@ class Render(object):
           y += 1 if y1 < y2 else -1
           threshold += 2 * dx
 
-    def scene_intersect(self, orig, direction):
-      for obj in self.scene:
-        if obj.ray_intersect(orig, direction):
-          return obj.material
-      return None
-
-    def cast_ray(self, orig, direction):
-      # esta funcion devuelve un color gracias al rayo
-      impacted_material = self.scene_intersect(orig, direction)
-      if impacted_material:
-        return impacted_material.diffuse
-      else:
-        return color(0, 1, 0)
-
-
-
     def render_function(self):
       alfa = int(math.pi / 2)
       for y in range(self.height):
@@ -260,40 +250,51 @@ class Render(object):
           direction = norm(V3(i, j, -1))
           self.framebuffer[y][x] = self.cast_ray(V3(0, 0, 0), direction)
 
-
+    def cast_ray(self, origin, dir):
+      impacted_material = self.scene_intersect(origin, dir)
+      if impacted_material:
+        return impacted_material.diffuse
+      else:
+        return color(0, 1, 0)
 
 
 # Create --------------------------
-
-ivory = Material(diffuse=color(0.39, 0.39, 0.39))
-rubber = Material(diffuse=color(0.03,0.04, 0))
-snow = Material(diffuse=color(1, 1, 1))
-button = Material(diffuse=color(0, 0, 0))
-eye = Material(diffuse=color(0.98, 0.98, 0.98))
-carrot = Material(diffuse=color(0,0,0))
+eye = Material(diffuse=color(1, 0.97, 0.95))
+dots = Material(diffuse=color(0, 0, 0))
+nose = Material(diffuse=color(1,0.58,0))
+snow_color = Material(diffuse=color(1, 1, 1))
 
 r = Render('Ray.bmp')
 r.glCreateWindow(800,600)
 r.glClear()
 r.scene = [
-  Sphere(V3(-0.6, -2.1,-10), 0.1, button),
-  Sphere(V3(-0.2, -1.9,-10), 0.1, button),
-  Sphere(V3(0.2, -1.9,-10), 0.1, button),
-  Sphere(V3(0.6, -2.1,-10), 0.1, button),
+  # These are for the snowman's body
+  Sphere(V3(0, -2.5, -10), 1.3, snow_color),
+  Sphere(V3(0, 0, -10), 1.8, snow_color),
+  Sphere(V3(0, 3, -12), 2.8, snow_color),
 
-  Sphere(V3(0, -2.5,-10), 0.3, carrot),
+  #Dots for the eyes
+  Sphere(V3(0.5, -5, -10), 0.2, eye),
+  Sphere(V3(-0.5, -5, -10), 0.2, eye),
 
-  Sphere(V3(0.5, -3,-10), 0.1, button),
-  Sphere(V3(-0.5, -3,-10), 0.1, button),
-  Sphere(V3(0.5, -3,-10), 0.2, eye),
-  Sphere(V3(-0.5, -3,-10), 0.2, eye),
+  # This is the nose
+  Sphere(V3(0, -2.5,-10), 0.3, nose),
 
-  Sphere(V3(0, -0.4,-10), 0.3, button),
-  Sphere(V3(0, 1,-10), 0.4, button),
-  Sphere(V3(0, 3,-10), 0.5, button),
-  Sphere(V3(0, -2.5,-10), 1.3, snow),
-	Sphere(V3(0, 0,-10), 1.8, snow),
-  Sphere(V3(0, 3,-12), 2.8, snow)
+  # All the mouth dots
+  Sphere(V3(-0.6, -2.1, -10), 0.1, dots),
+  Sphere(V3(-0.2, -1.9, -10), 0.1, dots),
+  Sphere(V3(0.2, -1.9, -10), 0.1, dots),
+  Sphere(V3(0.6, -2.1, -10), 0.1, dots),
+
+  #eyes
+  Sphere(V3(0.5, -3, -10), 0.1, dots),
+  Sphere(V3(-0.5, -3, -10), 0.1, dots),
+
+
+  Sphere(V3(0, -0.4,-10), 0.3, dots),
+  Sphere(V3(0, 1,-10), 0.4, dots),
+  Sphere(V3(0, 3,-10), 0.5, dots),
+
 ]
 r.glFinish()
 
