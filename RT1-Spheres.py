@@ -172,7 +172,7 @@ class Render(object):
       self.header()
 
 
-# Color Functions ---------------------------------
+# Color gl Functions ---------------------------------
 
     # Cleans a full image with the color defined in "change_color"
     def glClear(self):
@@ -245,13 +245,13 @@ class Render(object):
 
 # Functions for the snowMan
     def render_function(self):
-      alfa = int(math.pi / 2)
+      alfa = int( math.pi / 2)
       for y in range(self.height):
         for x in range(self.width):
-          i = (2 * (x + 0.5) / self.width - 1) * self.width / self.height * math.tan(alfa / 2)
-          j = (1 - 2 * (y + 0.5) / self.height) * math.tan(alfa / 2)
+          i = ( 2 *(x + 0.5) / self.width - 1) * self.width / self.height * math.tan(alfa / 2)
+          j = ( 1 - 2 *(y + 0.5) / self.height) * math.tan(alfa / 2)
           direction = norm(V3(i, j, -1))
-          self.framebuffer[y][x] = self.cast_ray(V3(0, 0, 0), direction)
+          self.framebuffer[y][x] = self.cast_ray( V3(0, 0, 0), direction)
 
     def cast_ray(self, origin, dir):
       created = self.scene_intersect(origin, dir)
@@ -262,7 +262,7 @@ class Render(object):
 
 
 # Create --------------------------
-
+buttons = Material(diffuse=color(0.32,0.32,0.32))
 snow_color = Material(diffuse=color(1, 0.97, 0.95))
 dots = Material(diffuse=color(0, 0, 0))
 eye = Material(diffuse=color(0,0,0))
@@ -282,15 +282,17 @@ r.scene = [
   #Mouth dots
   Sphere(V3(0, -2, -8), 0.1, eye),
   Sphere(V3(0.2, -2.2, -8), 0.1, eye),
+  Sphere(V3(-0.3, -2, -8), 0.1, eye),
+  Sphere(V3(-0.6, -2.2, -8), 0.1, eye),
 
+  #botones
+  Sphere(V3(-0.2,2,-8),0.6, buttons),
+  Sphere(V3(-0.2,-0.3,-8),0.4, buttons),
 
   #Snow man's body
   Sphere(V3(-0.2,2,-8),1.9, snow_color),
   Sphere(V3(-0.2,-0.3,-8),1.5, snow_color),
   Sphere(V3(-0.2,-2.5,-8),0.95, snow_color),
-
-
-
 
 
 
