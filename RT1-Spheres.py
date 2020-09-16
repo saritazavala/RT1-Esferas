@@ -7,7 +7,6 @@ import struct
 from collections import namedtuple
 import math
 
-import self as self
 
 V2 = namedtuple('Vertex2', ['x', 'y'])
 V3 = namedtuple('Vertex3', ['x', 'y', 'z'])
