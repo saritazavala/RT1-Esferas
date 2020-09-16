@@ -9,8 +9,8 @@ import math
 
 import self as self
 
-V2 = namedtuple('Point2', ['x', 'y'])
-V3 = namedtuple('Point3', ['x', 'y', 'z'])
+V2 = namedtuple('Vertex2', ['x', 'y'])
+V3 = namedtuple('Vertex3', ['x', 'y', 'z'])
 
 # Struct Functions ---------------------------------
 def char(c):
@@ -27,9 +27,6 @@ def dword(c):
 def color(red, green, blue):
      return bytes([round(blue * 255), round(green * 255), round(red * 255)])
 # --------------------------------------------------
-
-
-
 
 # Math functions ------------------------------------
 
@@ -104,15 +101,20 @@ class Sphere(object):
     tca = dot(L, direction)
     l = length(L)
     d2 = l ** 2 - tca ** 2
+
     if d2 > self.radius ** 2:
       return False
+
     thc = (self.radius ** 2 - d2) ** 1 / 2
     t0 = tca - thc
     t1 = tca + thc
+
     if t0 < 0:
       t0 = t1
+
     if t0 < 0:
       return False
+
     return True
 
 # Write a BMP file ---------------------------------
@@ -241,6 +243,7 @@ class Render(object):
           y += 1 if y1 < y2 else -1
           threshold += 2 * dx
 
+# Functions for the snowMan
     def render_function(self):
       alfa = int(math.pi / 2)
       for y in range(self.height):
@@ -251,49 +254,45 @@ class Render(object):
           self.framebuffer[y][x] = self.cast_ray(V3(0, 0, 0), direction)
 
     def cast_ray(self, origin, dir):
-      impacted_material = self.scene_intersect(origin, dir)
-      if impacted_material:
-        return impacted_material.diffuse
+      created = self.scene_intersect(origin, dir)
+      if created:
+        return created.diffuse
       else:
-        return color(0, 1, 0)
+        return color(0,0,1)
 
 
 # Create --------------------------
-eye = Material(diffuse=color(1, 0.97, 0.95))
-dots = Material(diffuse=color(0, 0, 0))
-nose = Material(diffuse=color(1,0.58,0))
-snow_color = Material(diffuse=color(1, 1, 1))
 
-r = Render('Ray.bmp')
+snow_color = Material(diffuse=color(1, 0.97, 0.95))
+dots = Material(diffuse=color(0, 0, 0))
+eye = Material(diffuse=color(0,0,0))
+nose = Material(diffuse=color(1,0.58,0))
+
+r = Render('Ray_SnowMan.bmp')
 r.glCreateWindow(800,600)
 r.glClear()
 r.scene = [
-  # These are for the snowman's body
-  Sphere(V3(0, -2.5, -10), 1.3, snow_color),
-  Sphere(V3(0, 0, -10), 1.8, snow_color),
-  Sphere(V3(0, 3, -12), 2.8, snow_color),
+  #Eyes
+  Sphere(V3(-0.4, -3, -8), 0.1, eye),
+  Sphere(V3(0, -3, -8), 0.1, eye),
 
-  #Dots for the eyes
-  Sphere(V3(0.5, -5, -10), 0.2, eye),
-  Sphere(V3(-0.5, -5, -10), 0.2, eye),
+  # Nose
+  Sphere(V3(-0.2, -2.5, -8), 0.2, nose),
 
-  # This is the nose
-  Sphere(V3(0, -2.5,-10), 0.3, nose),
-
-  # All the mouth dots
-  Sphere(V3(-0.6, -2.1, -10), 0.1, dots),
-  Sphere(V3(-0.2, -1.9, -10), 0.1, dots),
-  Sphere(V3(0.2, -1.9, -10), 0.1, dots),
-  Sphere(V3(0.6, -2.1, -10), 0.1, dots),
-
-  #eyes
-  Sphere(V3(0.5, -3, -10), 0.1, dots),
-  Sphere(V3(-0.5, -3, -10), 0.1, dots),
+  #Mouth dots
+  Sphere(V3(0, -2, -8), 0.1, eye),
+  Sphere(V3(0.2, -2.2, -8), 0.1, eye),
 
 
-  Sphere(V3(0, -0.4,-10), 0.3, dots),
-  Sphere(V3(0, 1,-10), 0.4, dots),
-  Sphere(V3(0, 3,-10), 0.5, dots),
+  #Snow man's body
+  Sphere(V3(-0.2,2,-8),1.9, snow_color),
+  Sphere(V3(-0.2,-0.3,-8),1.5, snow_color),
+  Sphere(V3(-0.2,-2.5,-8),0.95, snow_color),
+
+
+
+
+
 
 ]
 r.glFinish()
